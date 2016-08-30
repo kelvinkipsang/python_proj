@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask import render_template
-from flask import request,redirect,url_for
+from flask import request, redirect, url_for, render_template
+from flask_security import RoleMixin,Security,SQLAlchemyUserDatastore,UserMixin
+
 
 app= Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:12@localhost/testdb'
@@ -9,6 +10,7 @@ app.debug=True
 db=SQLAlchemy(app)
 
 # Define models from python hosted
+
 roles_users = db.Table('roles_users',
         db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
         db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
@@ -28,9 +30,28 @@ class User(db.Model, UserMixin):
                             backref=db.backref('users', lazy='dynamic'))
 
 
+# Setup Flask-Security
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
+
+# Create a user to test with
+@app.before_first_request
+def create_user():
+    db.create_all()
+    user_datastore.create_user(email='kel@hulu.net', password='nada')
+    db.session.commit()
+
 @app.route('/')
 def index():
-    return render_template('adduser.html')
+    myUser = User.query.all()
+    oneItem = User.query.filter_by(username="test2").all()
+    return render_template('add_user.html', myUser=myUser, oneItem=oneItem)
+
+@app.route('/profile/<email>')
+
+def profile(email):
+    user = User.query.filter_by(email=email).first()
+    return render_template('profile.html', user=user)
 
 @app.route('/post_user', methods=['POST'])
 def post_user():

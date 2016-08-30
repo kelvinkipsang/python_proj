@@ -13,11 +13,14 @@
 
         <input id="sname" type="text" name="sname"/>
 
-
-
-
-            <input type="submit"/>
+        <input type="submit"/>
     </form>
+
+     {% for user in myUser %}
+         <li>{{ user.id }}.  {{ user.username }} - {{ user.email }}</li>
+     {% endfor %}
+
+     {{ oneItem }}
 
 </body>
 </html>

@@ -34,18 +34,11 @@ class User(db.Model, UserMixin):
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
-# Create a user to test with
-@app.before_first_request
-def create_user():
-    db.create_all()
-    user_datastore.create_user(email='kel@hulu.net', password='nada')
-    db.session.commit()
+
 
 @app.route('/')
 def index():
-    myUser = User.query.all()
-    oneItem = User.query.filter_by(username="test2").all()
-    return render_template('add_user.html', myUser=myUser, oneItem=oneItem)
+    return render_template('add_user.html')
 
 @app.route('/profile/<email>')
 
